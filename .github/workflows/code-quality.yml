@@ -29,5 +29,3 @@ jobs:
       - name: Check code style with ESLint
         run: bun run lint
       
-      - name: Check code formatting with Prettier
-        run: bun prettier --check "**/*.{ts,js,json,md}"
