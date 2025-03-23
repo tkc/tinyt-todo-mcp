@@ -54,8 +54,8 @@ describe("TODO機能テスト", () => {
     expect(todo.content).toBe("テストTODOの内容です。重要度:高 期限:2025/4/1");
   });
 
-  test("最新のTODOを更新できる", () => {
-    console.log("Testing TODO update");
+  test("TODOリビジョンを追加できる", () => {
+    console.log("Testing TODO revision addition");
 
     // まず初期TODOを作成
     const initialTodo = {
@@ -63,29 +63,32 @@ describe("TODO機能テスト", () => {
     };
     const initialId = todoRepo.createTodo(initialTodo);
 
-    // 次に更新
+    // 次にリビジョンを追加
     const updatedContent = "更新されたTODOの内容です。重要度:高";
-    const updatedId = todoRepo.updateLatestTodo({ content: updatedContent });
+    const newRevisionId = todoRepo.updateTodoList({ content: updatedContent });
 
-    // 同じIDであることを確認
-    expect(updatedId).toBe(initialId);
+    // 新しいIDが生成されたことを確認
+    expect(newRevisionId).not.toBe(initialId);
+    expect(newRevisionId).toBeGreaterThan(initialId);
 
     // 更新されたTODOを取得して確認
-    const todo = todoRepo.getTodoById(updatedId);
+    const todo = todoRepo.getTodoById(newRevisionId);
     expect(todo).not.toBeNull();
-    expect(todo.content).toBe(updatedContent);
+    // 新しい内容と古い内容が結合されているか確認
+    expect(todo.content).toContain(updatedContent);
+    expect(todo.content).toContain(initialTodo.content);
   });
 
-  test("TODOが存在しない場合は新規作成される", () => {
-    console.log("Testing update with no existing TODO");
+  test("TODOが存在しない場合は新規リビジョンとして作成される", () => {
+    console.log("Testing revision with no existing TODO");
 
     // 最新のTODOを取得して存在しないことを確認
     const noTodo = todoRepo.getLatestTodo();
     expect(noTodo).toBeNull();
 
-    // updateLatestTodoを呼び出す
-    const content = "新しいTODOの内容です。";
-    const todoId = todoRepo.updateLatestTodo({ content });
+    // updateTodoListを呼び出す
+    const content = "新しいTODOリビジョンの内容です。";
+    const todoId = todoRepo.updateTodoList({ content });
 
     // IDが数値であることを確認
     expect(typeof todoId).toBe("number");
@@ -95,6 +98,31 @@ describe("TODO機能テスト", () => {
     const todo = todoRepo.getLatestTodo();
     expect(todo).not.toBeNull();
     expect(todo.content).toBe(content);
+  });
+
+  test("単一のTODOアイテムを追加できる", () => {
+    console.log("Testing adding a single TODO item");
+
+    // まず初期TODOを作成
+    const initialTodo = {
+      content: "初期TODOの内容です。",
+    };
+    todoRepo.createTodo(initialTodo);
+
+    // 単一アイテムを追加
+    const newItem = "新しいタスク";
+    const newItemId = todoRepo.addSingleTodo({ content: newItem });
+
+    // 新しいIDが生成されたことを確認
+    expect(typeof newItemId).toBe("number");
+    expect(newItemId).toBeGreaterThan(0);
+
+    // 追加されたTODOを取得して確認
+    const todo = todoRepo.getLatestTodo();
+    expect(todo).not.toBeNull();
+    // 新しいアイテムが追加されているか確認
+    expect(todo.content).toContain(newItem);
+    expect(todo.content).toContain(initialTodo.content);
   });
 
   test("複数のTODOを作成して最新のものを取得できる", () => {
@@ -131,24 +159,46 @@ describe("TODO機能テスト", () => {
     expect(nonExistingTodos.length).toBe(0);
   });
 
-  test("TODOとフォーマットプロンプトを取得できる", () => {
-    console.log("Testing getting TODO with format prompt");
+  test("サービス層でリビジョンのTODOリストを更新できる", () => {
+    console.log("Testing service layer's TODO list update");
 
-    // TODOを作成
-    const content = "重要なミーティングの準備 期限:2025/4/1 重要度:高";
-    todoRepo.createTodo({ content });
+    // 初期TODOを作成
+    const initialContent = "初期TODOの内容です。";
+    todoRepo.createTodo({ content: initialContent });
 
-    // サービスを使ってプロンプト付きで取得
-    const { todo, prompt } = todoService.getLatestTodoWithPrompt();
+    // サービスを使ってTODOリストを更新
+    const newContent = "- [ ] 新しいTODOリスト\n- [ ] タスク2";
+    const todoId = todoService.updateTodoList(newContent);
 
-    // TODOが取得できていることを確認
+    // IDが数値であることを確認
+    expect(typeof todoId).toBe("number");
+    
+    // 取得して内容を確認
+    const { todo } = todoService.getLatestTodoWithPrompt();
     expect(todo).not.toBeNull();
-    expect(todo.content).toBe(content);
+    expect(todo.content).toContain(newContent);
+    expect(todo.content).toContain(initialContent);
+  });
 
-    // プロンプトが存在していることを確認
-    expect(prompt).toBeDefined();
-    expect(prompt.length).toBeGreaterThan(100); // プロンプトは十分な長さがあるはず
-    expect(prompt).toContain("TODO");
+  test("サービス層で単一のTODOアイテムを追加できる", () => {
+    console.log("Testing service layer's single TODO item addition");
+
+    // 初期TODOを作成
+    const initialContent = "- [ ] 既存のタスク";
+    todoRepo.createTodo({ content: initialContent });
+
+    // サービスを使って単一アイテムを追加
+    const newItem = "新しいタスク";
+    const todoId = todoService.addSingleTodo(newItem);
+
+    // IDが数値であることを確認
+    expect(typeof todoId).toBe("number");
+    
+    // 取得して内容を確認
+    const { todo } = todoService.getLatestTodoWithPrompt();
+    expect(todo).not.toBeNull();
+    expect(todo.content).toContain(newItem);
+    expect(todo.content).toContain(initialContent);
   });
 
   test("検索結果とフォーマットプロンプトを取得できる", () => {

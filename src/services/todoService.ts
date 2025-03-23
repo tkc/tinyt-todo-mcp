@@ -68,10 +68,17 @@ const TODO_FORMAT_PROMPT = `Below is a TODO list written in various formats. Ple
 `;
 
 /**
- * Update latest TODO
+ * Add a single todo item to the existing todo list
  */
-export function updateTodo(content: string): number {
-  return todoRepo.updateLatestTodo({ content });
+export function addSingleTodo(content: string): number {
+  return todoRepo.addSingleTodo({ content });
+}
+
+/**
+ * Update the entire todo list with a new revision
+ */
+export function updateTodoList(content: string): number {
+  return todoRepo.updateTodoList({ content });
 }
 
 /**

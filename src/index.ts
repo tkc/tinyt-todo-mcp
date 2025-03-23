@@ -44,6 +44,10 @@ const TodoCreateSchema = z.object({
   content: z.string().describe("The content of the TODO"),
 });
 
+const TodoItemSchema = z.object({
+  content: z.string().describe("A single TODO item to add to the list"),
+});
+
 const TodoSearchSchema = z.object({
   search_text: z.string().describe("Search text in TODO content"),
 });
@@ -59,12 +63,12 @@ const server = new McpServer({
 // TODO tools
 server.tool(
   "update_todo",
-  "Updates the TODO with new content. If a TODO already exists, it overwrites the latest one. If not, it creates a new one.",
+  "COMPLETE REPLACEMENT: Replaces the entire TODO list with new content. Use this when you want to send a completely formatted TODO list. Previous versions are preserved as history. Input should be a full, formatted TODO list with all items.",
   TodoCreateSchema.shape,
   async (args) => {
     try {
-      // TODOを更新
-      todoService.updateTodo(args.content);
+      // TODO全体を新しいリビジョンとして更新
+      todoService.updateTodoList(args.content);
 
       // 最新のTODOを取得
       const { todo, prompt } = todoService.getLatestTodoWithPrompt();
@@ -81,18 +85,65 @@ server.tool(
         };
       }
 
-      // get_latest_todoと同じレスポンス形式を返す
       return {
         content: [
           {
             type: "text",
-            text: `TODO:\n${todo.content}\n\nPrompt for formatting:\n${prompt}\n\n${HOLIDAYS_2025}`,
+            text: `TODO list updated with new revision:\n${todo.content}\n\nPrompt for formatting:\n${prompt}\n\n${HOLIDAYS_2025}`,
           },
         ],
         isError: false,
       };
     } catch (error) {
-      log("error", "Update TODO error:", error);
+      log("error", "Update TODO list error:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `An error occurred: ${error instanceof Error ? error.message : String(error)}\n\n${HOLIDAYS_2025}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  },
+);
+
+server.tool(
+  "add_todo_item",
+  "SINGLE ITEM ADDITION: Adds just one new TODO item to the existing list. Use this when you want to add a specific task without modifying the rest of the list. Input should be just the task text without any formatting.",
+  TodoItemSchema.shape,
+  async (args) => {
+    try {
+      // 単一のTODOアイテムを追加
+      todoService.addSingleTodo(args.content);
+
+      // 最新のTODOを取得
+      const { todo, prompt } = todoService.getLatestTodoWithPrompt();
+
+      if (!todo) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `TODO item added, but no TODOs found in database.\n\n${HOLIDAYS_2025}`,
+            },
+          ],
+          isError: false,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `TODO item added:\n${todo.content}\n\nPrompt for formatting:\n${prompt}\n\n${HOLIDAYS_2025}`,
+          },
+        ],
+        isError: false,
+      };
+    } catch (error) {
+      log("error", "Add TODO item error:", error);
       return {
         content: [
           {
@@ -215,7 +266,14 @@ async function main() {
     // Display startup messages
     log("info", "Tiny TODO MCP Server started");
     log("info", "Available tools:");
-    log("info", " - update_todo: Update the latest TODO");
+    log(
+      "info",
+      " - update_todo: COMPLETE REPLACEMENT - Send a full formatted TODO list",
+    );
+    log(
+      "info",
+      " - add_todo_item: SINGLE ITEM ADDITION - Add one task without changing the rest",
+    );
     log("info", " - get_latest_todo: Get the latest TODO");
     log("info", " - search_todo: Search TODOs by text");
     log("info", "Listening for requests...");

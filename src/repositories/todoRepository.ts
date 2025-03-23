@@ -22,25 +22,43 @@ export function createTodo(todo: TodoCreateInput): number {
 }
 
 /**
- * Update or create the latest todo
- * 最新のTODOを更新または作成する
+ * Add a single todo item to the existing todo list
  */
-export function updateLatestTodo(todo: TodoCreateInput): number {
+export function addSingleTodo(todo: TodoCreateInput): number {
   const db = getDatabase();
   const latestTodo = getLatestTodo();
 
+  // 新しいTODOアイテムを追加（既存のものがあれば、それに追加）
+  let newContent = todo.content;
   if (latestTodo) {
-    // 最新のTODOが存在する場合は更新
-    const update = db.prepare("UPDATE todos SET content = ? WHERE id = ?");
-    update.run(todo.content, latestTodo.id);
-    return latestTodo.id;
+    // 既存のTODOに新しいアイテムを追加
+    newContent = `${latestTodo.content}\n- [ ] ${todo.content}`;
   } else {
-    // 最新のTODOが存在しない場合は新規作成
-    const insert = db.prepare("INSERT INTO todos (content) VALUES (?)");
-    const result = insert.run(todo.content);
-    return Number(result.lastInsertRowid);
+    // 初めてのTODOの場合、適切なフォーマットで開始
+    newContent = `- [ ] ${todo.content}`;
   }
+
+  const insert = db.prepare("INSERT INTO todos (content) VALUES (?)");
+  const result = insert.run(newContent);
+  return Number(result.lastInsertRowid);
 }
+
+/**
+ * Update the entire todo list with a new revision
+ */
+export function updateTodoList(todo: TodoCreateInput): number {
+  const db = getDatabase();
+  const latestTodo = getLatestTodo();
+
+  const newRevision = latestTodo
+    ? `${todo.content}\n${latestTodo.content}`
+    : todo.content;
+  const insert = db.prepare("INSERT INTO todos (content) VALUES (?)");
+  const result = insert.run(newRevision);
+  return Number(result.lastInsertRowid);
+}
+
+// 注: updateLatestTodo は削除し、代わりに addTodoRevision を使用
 
 /**
  * Get todo by ID
