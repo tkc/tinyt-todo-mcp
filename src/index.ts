@@ -103,7 +103,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 server.tool(
@@ -147,7 +147,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 server.tool(
@@ -157,7 +157,7 @@ server.tool(
   async (args) => {
     try {
       const { todos, prompt } = todoService.searchTodoWithPrompt(
-        args.search_text
+        args.search_text,
       );
 
       if (todos.length === 0) {
@@ -198,7 +198,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 // Server start function
