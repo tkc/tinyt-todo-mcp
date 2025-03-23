@@ -1,0 +1,33 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        run: bun install
+      
+      - name: Check TypeScript types
+        run: bun run check
+      
+      - name: Check code style with ESLint
+        run: bun run lint
+      
+      - name: Check code formatting with Prettier
+        run: bun prettier --check "**/*.{ts,js,json,md}"

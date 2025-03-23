@@ -1,0 +1,36 @@
+{
+  "name": "quiz-mcp-template",
+  "version": "0.1.0",
+  "module": "src/mcp-server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "build": "tsc",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "check": "bun run lint && tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@litdb/bun-sqlite": "^0.0.10",
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "@types/jest": "^29.5.14",
+    "chromadb": "^2.0.1",
+    "i": "^0.3.7",
+    "npm": "^11.2.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "@types/web": "^0.0.213",
+    "bun-types": "^1.2.5",
+    "eslint": "^8.57.0",
+    "prettier": "3.5.3",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.26.1"
+  }
+}

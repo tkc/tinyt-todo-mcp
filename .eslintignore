@@ -1,0 +1,3 @@
+# ビルドされたファイルを無視
+dist/
+node_modules/
