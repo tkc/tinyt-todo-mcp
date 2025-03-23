@@ -40,19 +40,30 @@ const TODO_FORMAT_PROMPT = `Below is a TODO list written in various formats. Ple
    - If no priority is mentioned, output \`*Priority:* Normal\`.
 5. **Notes:**  
    - If there are any additional notes or details, include them under \`*Notes:*\`.
+6. **Sorting Order:**  
+   - Sort tasks in the following order:  
+     1. Incomplete tasks with specific due dates (closest first)
+     2. Incomplete tasks with TBD dates (sorted by priority: High > Medium > Normal > Low)
+     3. Completed tasks (sorted by completion date, most recent first)
 **Example Output:**
 \`\`\`markdown
+- [ ] 🏃 **Morning Run**  
+  *Due:* 2025/03/24 (07:00)  
+  *Priority:* Normal  
 - [ ] ✏️ **Write Blog Post**  
   *Due:* 2025/05/01 (14:30)  
   *Priority:* High  
   *Notes:* Research topic, draft outline, review with team
-- [x] 🏃 **Morning Workout**  
-  *Completed on:* 2025/04/30 (07:00)  
-  *Priority:* Normal
+- [ ] 💼 **Prepare Presentation**  
+  *Due:* TBD  
+  *Priority:* High  
 - [ ] 🍳 **Bake Cupcakes**  
   *Due:* TBD  
   *Priority:* Low  
   *Notes:* Buy ingredients, follow recipe, decorate with sprinkles
+- [x] 📚 **Read Chapter 5**  
+  *Completed on:* 2025/03/22 (19:45)  
+  *Priority:* Normal
 \`\`\`
 `;
 
