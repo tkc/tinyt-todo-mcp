@@ -13,7 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "paths": {
-      "bun:sqlite": ["./node_modules/bun-types/types.d.ts"]
+      "bun:sqlite": ["./node_modules/bun-types/sqlite.d.ts"]
     }
   },
   "include": ["src/**/*", "types/**/*"],
