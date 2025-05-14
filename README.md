@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/tkc-tinyt-todo-mcp-badge.png)](https://mseep.ai/app/tkc-tinyt-todo-mcp)
+
 # Tiny TODO MCP
 
 A Model Context Protocol (MCP) server implementation providing persistent task management capabilities for AI assistants.
